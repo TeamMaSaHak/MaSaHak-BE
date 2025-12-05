@@ -1,0 +1,85 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Environment (민감 정보)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# MCP 설정 (Supabase 토큰 포함)
+.mcp.json
+
+# Claude Code (개인 사용)
+.claude/
+CLAUDE.md
+
+# Firebase (서비스 계정 키)
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Test
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache
+.cache/
+.eslintcache
+.npm/
+*.tgz
+
+# Debug
+.clinic/
+*.cpuprofile
+*.heapprofile
+
+# Misc
+*.bak
+*.backup
+*.orig
+
+# Screenshots / Images (임시 파일)
+*.png
+*.jpg
+*.jpeg
+*.gif
+!src/**/*.png
+!src/**/*.jpg
+!public/**/*.png
+!public/**/*.jpg
