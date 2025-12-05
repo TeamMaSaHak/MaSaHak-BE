@@ -297,22 +297,22 @@ src/
 
 ```
 main (배포용)
-  └── develop (개발 통합)
-        ├── feature/auth-discord (성호)
-        ├── feature/todos-crud (감귤)
-        ├── feature/recurring-todos (감귤)
-        ├── feature/calendar-stats (성호)
+  └── dev (개발 통합)
+        ├── feat/auth-discord (성호)
+        ├── feat/todos-crud (감귤)
+        ├── feat/recurring-todos (감귤)
+        ├── feat/calendar-stats (성호)
         └── ...
 ```
 
 ### 브랜치 네이밍 규칙
-- `feature/{기능명}` : 새 기능 개발
+- `feat/{기능명}` : 새 기능 개발
 - `fix/{이슈명}` : 버그 수정
 - `refactor/{대상}` : 리팩토링
 
 ### 머지 규칙
-1. `feature/*` → `develop` : PR 생성 후 코드 리뷰 필수
-2. `develop` → `main` : 배포 전 통합 테스트 후 머지
+1. `feat/*` → `dev` : PR 생성 후 코드 리뷰 필수
+2. `dev` → `main` : 배포 전 통합 테스트 후 머지
 
 ---
 
