@@ -19,6 +19,8 @@ export const ERROR_CODES = {
   // Notifications (감귤)
 
   // Timer (성호)
+  TIMER_SESSION_NOT_FOUND: 'TIMER_SESSION_NOT_FOUND',
+  TIMER_SESSION_ALREADY_ENDED: 'TIMER_SESSION_ALREADY_ENDED',
 
   // Pomodoro (성호/감귤)
 } as const;
