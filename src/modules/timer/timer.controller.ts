@@ -1,17 +1,9 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Param,
-  HttpStatus,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiParam,
 } from '@nestjs/swagger';
 import { TimerService } from './timer.service';
 import { CurrentUser } from '../../common/decorators';
@@ -21,6 +13,8 @@ import {
   StartTimerResponseDto,
   StopTimerRequestDto,
   StopTimerResponseDto,
+  PauseTimerRequestDto,
+  ResumeTimerRequestDto,
 } from './dto';
 import type { JwtPayload } from '../auth/interfaces';
 
@@ -92,12 +86,11 @@ export class TimerController {
     };
   }
 
-  @Post('pause/:sessionId')
+  @Post('pause')
   @ApiOperation({
     summary: '타이머 일시정지',
     description: '타이머를 일시정지합니다. (상태 관리는 클라이언트에서 수행)',
   })
-  @ApiParam({ name: 'sessionId', description: '세션 ID', type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
     description: '일시정지 성공',
@@ -108,12 +101,12 @@ export class TimerController {
   })
   async pauseTimer(
     @CurrentUser() user: JwtPayload,
-    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() dto: PauseTimerRequestDto,
   ): Promise<ApiResponseDto<{ message: string }>> {
     const result = await this.timerService.pauseTimer(
       user.sub,
       user.guildId,
-      sessionId,
+      dto.sessionId,
     );
     return {
       success: true,
@@ -121,12 +114,11 @@ export class TimerController {
     };
   }
 
-  @Post('resume/:sessionId')
+  @Post('resume')
   @ApiOperation({
     summary: '타이머 재개',
     description: '일시정지된 타이머를 재개합니다. (상태 관리는 클라이언트에서 수행)',
   })
-  @ApiParam({ name: 'sessionId', description: '세션 ID', type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
     description: '재개 성공',
@@ -137,12 +129,12 @@ export class TimerController {
   })
   async resumeTimer(
     @CurrentUser() user: JwtPayload,
-    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() dto: ResumeTimerRequestDto,
   ): Promise<ApiResponseDto<{ message: string }>> {
     const result = await this.timerService.resumeTimer(
       user.sub,
       user.guildId,
-      sessionId,
+      dto.sessionId,
     );
     return {
       success: true,
