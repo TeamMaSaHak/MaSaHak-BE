@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SupabaseModule } from './database/supabase';
 import { JwtAuthGuard } from './common/guards';
 import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { HealthModule } from './modules/health/health.module';
     SupabaseModule,
     // 기능 모듈
     HealthModule,
+    AuthModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
