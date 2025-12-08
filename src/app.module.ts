@@ -6,6 +6,7 @@ import { SupabaseModule } from './database/supabase';
 import { JwtAuthGuard } from './common/guards';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './modules/auth/auth.module';
     // 기능 모듈
     HealthModule,
     AuthModule,
+    PomodoroModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
