@@ -6,6 +6,7 @@ import { SupabaseModule } from './database/supabase';
 import { JwtAuthGuard } from './common/guards';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TimerModule } from './modules/timer/timer.module';
 import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
     // 기능 모듈
     HealthModule,
     AuthModule,
+    TimerModule,
     PomodoroModule,
   ],
   providers: [
