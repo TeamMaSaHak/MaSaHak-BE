@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { SupabaseService } from '../../database/supabase';
 import { GetMonthlyCalendarResponseDto, CalendarDayDto } from './dto';
 import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
@@ -49,10 +53,16 @@ export class CalendarService {
 
     if (sessionsError) {
       this.logger.error(`Failed to fetch sessions: ${sessionsError.message}`);
+      throw new InternalServerErrorException(
+        '캘린더 데이터를 불러오는데 실패했습니다.',
+      );
     }
 
     if (diariesError) {
       this.logger.error(`Failed to fetch diaries: ${diariesError.message}`);
+      throw new InternalServerErrorException(
+        '캘린더 데이터를 불러오는데 실패했습니다.',
+      );
     }
 
     // 날짜별 공부 시간 집계
