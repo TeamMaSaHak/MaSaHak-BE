@@ -8,6 +8,7 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TimerModule } from './modules/timer/timer.module';
 import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
+import { CalendarModule } from './modules/calendar/calendar.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
     AuthModule,
     TimerModule,
     PomodoroModule,
+    CalendarModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
