@@ -48,9 +48,12 @@ export class PomodoroService {
     const settings = await this.getUserSettings(userId, guildId);
 
     // 요청 값 또는 설정값 또는 기본값 사용
-    const focusTime = dto.focusTime ?? settings.focus_time ?? DEFAULT_SETTINGS.focusTime;
-    const breakTime = dto.breakTime ?? settings.break_time ?? DEFAULT_SETTINGS.breakTime;
-    const repeatCount = dto.repeatCount ?? settings.repeat_count ?? DEFAULT_SETTINGS.repeatCount;
+    const focusTime =
+      dto.focusTime ?? settings.focus_time ?? DEFAULT_SETTINGS.focusTime;
+    const breakTime =
+      dto.breakTime ?? settings.break_time ?? DEFAULT_SETTINGS.breakTime;
+    const repeatCount =
+      dto.repeatCount ?? settings.repeat_count ?? DEFAULT_SETTINGS.repeatCount;
 
     const { data, error } = await supabase
       .from('voice_sessions')
@@ -96,8 +99,12 @@ export class PomodoroService {
       .single();
 
     if (findError) {
-      this.logger.error(`Failed to find pomodoro session: ${findError.message}`);
-      throw new InternalServerErrorException('세션 조회 중 오류가 발생했습니다.');
+      this.logger.error(
+        `Failed to find pomodoro session: ${findError.message}`,
+      );
+      throw new InternalServerErrorException(
+        '세션 조회 중 오류가 발생했습니다.',
+      );
     }
 
     if (!session) {
@@ -207,7 +214,9 @@ export class PomodoroService {
 
     if (error) {
       this.logger.error(`Failed to validate session: ${error.message}`);
-      throw new InternalServerErrorException('세션 검증 중 오류가 발생했습니다.');
+      throw new InternalServerErrorException(
+        '세션 검증 중 오류가 발생했습니다.',
+      );
     }
 
     if (!data) {

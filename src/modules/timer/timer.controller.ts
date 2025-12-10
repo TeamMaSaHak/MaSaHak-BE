@@ -117,7 +117,8 @@ export class TimerController {
   @Post('resume')
   @ApiOperation({
     summary: '타이머 재개',
-    description: '일시정지된 타이머를 재개합니다. (상태 관리는 클라이언트에서 수행)',
+    description:
+      '일시정지된 타이머를 재개합니다. (상태 관리는 클라이언트에서 수행)',
   })
   @ApiResponse({
     status: HttpStatus.OK,

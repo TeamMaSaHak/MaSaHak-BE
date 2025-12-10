@@ -2,10 +2,16 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AuthTokensDto } from './auth-tokens.dto';
 
 export class UserProfileDto {
-  @ApiProperty({ description: '유저 ID (Discord ID)', example: '123456789012345678' })
+  @ApiProperty({
+    description: '유저 ID (Discord ID)',
+    example: '123456789012345678',
+  })
   userId: string;
 
-  @ApiProperty({ description: '서버 ID (Guild ID)', example: '987654321098765432' })
+  @ApiProperty({
+    description: '서버 ID (Guild ID)',
+    example: '987654321098765432',
+  })
   guildId: string;
 
   @ApiProperty({ description: '닉네임', example: '마법사' })
@@ -47,6 +53,9 @@ export class VerifyMemberResponseDto {
   @ApiProperty({ description: '서버 멤버 여부', example: true })
   isMember: boolean;
 
-  @ApiPropertyOptional({ description: '사용자 프로필 (멤버인 경우)', type: UserProfileDto })
+  @ApiPropertyOptional({
+    description: '사용자 프로필 (멤버인 경우)',
+    type: UserProfileDto,
+  })
   user?: UserProfileDto;
 }
