@@ -4,8 +4,18 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { SupabaseService } from '../../database/supabase';
-import { GetMonthlyCalendarResponseDto, CalendarDayDto } from './dto';
-import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
+import {
+  GetMonthlyCalendarResponseDto,
+  CalendarDayDto,
+  GetDailyStatsResponseDto,
+} from './dto';
+import {
+  startOfMonth,
+  endOfMonth,
+  format,
+  parseISO,
+  subDays,
+} from 'date-fns';
 
 @Injectable()
 export class CalendarService {
@@ -107,6 +117,99 @@ export class CalendarService {
       year,
       month,
       days,
+    };
+  }
+
+  async getDailyStats(
+    userId: string,
+    guildId: string,
+    date: string,
+  ): Promise<GetDailyStatsResponseDto> {
+    const supabase = this.supabaseService.getClient();
+
+    const targetDate = parseISO(date);
+    const yesterdayDate = format(subDays(targetDate, 1), 'yyyy-MM-dd');
+
+    // 오늘과 어제 세션을 병렬로 조회
+    const [todayResult, yesterdayResult] = await Promise.all([
+      supabase
+        .from('voice_sessions')
+        .select('started_at, duration_seconds')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('started_at', `${date}T00:00:00`)
+        .lte('started_at', `${date}T23:59:59`)
+        .not('duration_seconds', 'is', null)
+        .order('started_at', { ascending: true }),
+      supabase
+        .from('voice_sessions')
+        .select('duration_seconds')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('started_at', `${yesterdayDate}T00:00:00`)
+        .lte('started_at', `${yesterdayDate}T23:59:59`)
+        .not('duration_seconds', 'is', null),
+    ]);
+
+    const { data: todaySessions, error: todayError } = todayResult;
+    const { data: yesterdaySessions, error: yesterdayError } = yesterdayResult;
+
+    if (todayError) {
+      this.logger.error(`Failed to fetch today sessions: ${todayError.message}`);
+      throw new InternalServerErrorException(
+        '일별 통계를 불러오는데 실패했습니다.',
+      );
+    }
+
+    if (yesterdayError) {
+      this.logger.error(
+        `Failed to fetch yesterday sessions: ${yesterdayError.message}`,
+      );
+      throw new InternalServerErrorException(
+        '일별 통계를 불러오는데 실패했습니다.',
+      );
+    }
+
+    // 오늘 총 공부 시간 (분)
+    let totalMinutes = 0;
+    let longestSessionMinutes = 0;
+    let firstStartTime: string | null = null;
+
+    if (todaySessions && todaySessions.length > 0) {
+      for (const session of todaySessions) {
+        const durationSeconds = (session.duration_seconds as number) || 0;
+        const sessionMinutes = Math.floor(durationSeconds / 60);
+        totalMinutes += sessionMinutes;
+
+        if (sessionMinutes > longestSessionMinutes) {
+          longestSessionMinutes = sessionMinutes;
+        }
+      }
+
+      // 첫 공부 시작 시간
+      const firstSession = todaySessions[0];
+      if (firstSession.started_at) {
+        firstStartTime = format(parseISO(firstSession.started_at as string), 'HH:mm');
+      }
+    }
+
+    // 어제 총 공부 시간 (분)
+    let yesterdayTotalMinutes = 0;
+    if (yesterdaySessions) {
+      for (const session of yesterdaySessions) {
+        const durationSeconds = (session.duration_seconds as number) || 0;
+        yesterdayTotalMinutes += Math.floor(durationSeconds / 60);
+      }
+    }
+
+    const diffFromYesterday = totalMinutes - yesterdayTotalMinutes;
+
+    return {
+      date,
+      totalMinutes,
+      diffFromYesterday,
+      firstStartTime,
+      longestSessionMinutes,
     };
   }
 }
