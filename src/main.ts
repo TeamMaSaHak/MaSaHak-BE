@@ -7,9 +7,6 @@ import { GlobalExceptionFilter } from './common/filters';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 전역 API prefix 설정
-  app.setGlobalPrefix('api');
-
   // CORS 설정
   app.enableCors({
     origin: true,
