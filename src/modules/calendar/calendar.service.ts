@@ -25,28 +25,31 @@ export class CalendarService {
     const startDateStr = format(monthStart, 'yyyy-MM-dd');
     const endDateStr = format(monthEnd, 'yyyy-MM-dd');
 
-    // 1. voice_sessions에서 해당 월의 공부 시간 조회
-    const { data: sessions, error: sessionsError } = await supabase
-      .from('voice_sessions')
-      .select('started_at, duration_seconds')
-      .eq('user_id', userId)
-      .eq('guild_id', guildId)
-      .gte('started_at', `${startDateStr}T00:00:00`)
-      .lte('started_at', `${endDateStr}T23:59:59`)
-      .not('duration_seconds', 'is', null);
+    // 1. voice_sessions와 diaries를 병렬로 조회
+    const [sessionsResult, diariesResult] = await Promise.all([
+      supabase
+        .from('voice_sessions')
+        .select('started_at, duration_seconds')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('started_at', `${startDateStr}T00:00:00`)
+        .lte('started_at', `${endDateStr}T23:59:59`)
+        .not('duration_seconds', 'is', null),
+      supabase
+        .from('diaries')
+        .select('diary_date')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('diary_date', startDateStr)
+        .lte('diary_date', endDateStr),
+    ]);
+
+    const { data: sessions, error: sessionsError } = sessionsResult;
+    const { data: diaries, error: diariesError } = diariesResult;
 
     if (sessionsError) {
       this.logger.error(`Failed to fetch sessions: ${sessionsError.message}`);
     }
-
-    // 2. diaries에서 해당 월의 일기 작성 여부 조회
-    const { data: diaries, error: diariesError } = await supabase
-      .from('diaries')
-      .select('diary_date')
-      .eq('user_id', userId)
-      .eq('guild_id', guildId)
-      .gte('diary_date', startDateStr)
-      .lte('diary_date', endDateStr);
 
     if (diariesError) {
       this.logger.error(`Failed to fetch diaries: ${diariesError.message}`);
