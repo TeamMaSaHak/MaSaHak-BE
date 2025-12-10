@@ -8,6 +8,7 @@ import {
   GetMonthlyCalendarResponseDto,
   CalendarDayDto,
   GetDailyStatsResponseDto,
+  GetMonthlyStatsResponseDto,
 } from './dto';
 import {
   startOfMonth,
@@ -15,6 +16,7 @@ import {
   format,
   parseISO,
   subDays,
+  getDaysInMonth,
 } from 'date-fns';
 
 @Injectable()
@@ -210,6 +212,94 @@ export class CalendarService {
       diffFromYesterday,
       firstStartTime,
       longestSessionMinutes,
+    };
+  }
+
+  async getMonthlyStats(
+    userId: string,
+    guildId: string,
+    year: number,
+    month: number,
+  ): Promise<GetMonthlyStatsResponseDto> {
+    const supabase = this.supabaseService.getClient();
+
+    const targetDate = new Date(year, month - 1, 1);
+    const monthStart = startOfMonth(targetDate);
+    const monthEnd = endOfMonth(targetDate);
+
+    const startDateStr = format(monthStart, 'yyyy-MM-dd');
+    const endDateStr = format(monthEnd, 'yyyy-MM-dd');
+    const totalDaysInMonth = getDaysInMonth(targetDate);
+
+    // voice_sessions와 todos를 병렬로 조회
+    const [sessionsResult, todosResult] = await Promise.all([
+      supabase
+        .from('voice_sessions')
+        .select('started_at, duration_seconds')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('started_at', `${startDateStr}T00:00:00`)
+        .lte('started_at', `${endDateStr}T23:59:59`)
+        .not('duration_seconds', 'is', null),
+      supabase
+        .from('todos')
+        .select('todo_id')
+        .eq('user_id', userId)
+        .eq('guild_id', guildId)
+        .gte('todo_date', startDateStr)
+        .lte('todo_date', endDateStr)
+        .eq('is_completed', true),
+    ]);
+
+    const { data: sessions, error: sessionsError } = sessionsResult;
+    const { data: todos, error: todosError } = todosResult;
+
+    if (sessionsError) {
+      this.logger.error(
+        `Failed to fetch sessions for monthly stats: ${sessionsError.message}`,
+      );
+      throw new InternalServerErrorException(
+        '월별 통계를 불러오는데 실패했습니다.',
+      );
+    }
+
+    if (todosError) {
+      this.logger.error(
+        `Failed to fetch todos for monthly stats: ${todosError.message}`,
+      );
+      throw new InternalServerErrorException(
+        '월별 통계를 불러오는데 실패했습니다.',
+      );
+    }
+
+    // 출석 일수 및 총 공부 시간 계산
+    const studyDates = new Set<string>();
+    let totalMinutes = 0;
+
+    if (sessions) {
+      for (const session of sessions) {
+        const startedAt = session.started_at as string;
+        const date = format(parseISO(startedAt), 'yyyy-MM-dd');
+        studyDates.add(date);
+
+        const durationSeconds = (session.duration_seconds as number) || 0;
+        totalMinutes += Math.floor(durationSeconds / 60);
+      }
+    }
+
+    const attendanceDays = studyDates.size;
+    const averageMinutesPerDay =
+      attendanceDays > 0 ? Math.floor(totalMinutes / attendanceDays) : 0;
+    const completedTodos = todos?.length || 0;
+
+    return {
+      year,
+      month,
+      attendanceDays,
+      totalDaysInMonth,
+      totalMinutes,
+      averageMinutesPerDay,
+      completedTodos,
     };
   }
 }

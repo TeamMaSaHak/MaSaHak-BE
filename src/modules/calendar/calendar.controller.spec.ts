@@ -10,6 +10,7 @@ describe('CalendarController', () => {
   const mockCalendarService = {
     getMonthlyCalendar: jest.fn(),
     getDailyStats: jest.fn(),
+    getMonthlyStats: jest.fn(),
   };
 
   const mockUser: JwtPayload = {
@@ -87,6 +88,36 @@ describe('CalendarController', () => {
         mockUser.sub,
         mockUser.guildId,
         '2025-08-12',
+      );
+    });
+  });
+
+  describe('getMonthlyStats', () => {
+    it('should return monthly stats (200)', async () => {
+      const mockResult = {
+        year: 2025,
+        month: 8,
+        attendanceDays: 15,
+        totalDaysInMonth: 31,
+        totalMinutes: 1500,
+        averageMinutesPerDay: 100,
+        completedTodos: 25,
+      };
+
+      mockCalendarService.getMonthlyStats.mockResolvedValue(mockResult);
+
+      const result = await controller.getMonthlyStats(mockUser, {
+        year: 2025,
+        month: 8,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(mockResult);
+      expect(mockCalendarService.getMonthlyStats).toHaveBeenCalledWith(
+        mockUser.sub,
+        mockUser.guildId,
+        2025,
+        8,
       );
     });
   });

@@ -15,6 +15,8 @@ import {
   GetMonthlyCalendarResponseDto,
   GetDailyStatsQueryDto,
   GetDailyStatsResponseDto,
+  GetMonthlyStatsQueryDto,
+  GetMonthlyStatsResponseDto,
 } from './dto';
 import type { JwtPayload } from '../auth/interfaces';
 
@@ -23,6 +25,51 @@ import type { JwtPayload } from '../auth/interfaces';
 @Controller('calendar')
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}
+
+  @Get('stats/monthly')
+  @ApiOperation({
+    summary: '월별 통계 조회',
+    description:
+      '특정 월의 통계를 조회합니다. 출석 일수, 총 집중 시간, 일 평균 집중 시간, 완료한 투두 개수를 반환합니다.',
+  })
+  @ApiQuery({
+    name: 'year',
+    description: '조회할 연도',
+    example: 2025,
+  })
+  @ApiQuery({
+    name: 'month',
+    description: '조회할 월',
+    example: 8,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '월별 통계 조회 성공',
+    type: ApiResponseDto<GetMonthlyStatsResponseDto>,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '인증 실패',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '잘못된 요청 파라미터',
+  })
+  async getMonthlyStats(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: GetMonthlyStatsQueryDto,
+  ): Promise<ApiResponseDto<GetMonthlyStatsResponseDto>> {
+    const result = await this.calendarService.getMonthlyStats(
+      user.sub,
+      user.guildId,
+      query.year,
+      query.month,
+    );
+    return {
+      success: true,
+      data: result,
+    };
+  }
 
   @Get('stats/daily')
   @ApiOperation({
