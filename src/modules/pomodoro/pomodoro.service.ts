@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { SupabaseService } from '../../database/supabase';
 import {
@@ -94,7 +95,12 @@ export class PomodoroService {
       .eq('source', POMODORO_SOURCE)
       .single();
 
-    if (findError || !session) {
+    if (findError) {
+      this.logger.error(`Failed to find pomodoro session: ${findError.message}`);
+      throw new InternalServerErrorException('세션 조회 중 오류가 발생했습니다.');
+    }
+
+    if (!session) {
       throw new NotFoundException(ERROR_CODES.POMODORO_SESSION_NOT_FOUND);
     }
 
@@ -166,7 +172,12 @@ export class PomodoroService {
       .eq('guild_id', guildId)
       .single();
 
-    if (error || !data) {
+    // PGRST116: 결과가 없을 때 발생하는 에러 코드 (설정이 없는 경우)
+    if (error && error.code !== 'PGRST116') {
+      this.logger.error(`Failed to get user settings: ${error.message}`);
+    }
+
+    if (!data) {
       // 설정이 없으면 기본값 반환
       return {
         focus_time: DEFAULT_SETTINGS.focusTime,
@@ -194,7 +205,12 @@ export class PomodoroService {
       .eq('source', POMODORO_SOURCE)
       .single();
 
-    if (error || !data) {
+    if (error) {
+      this.logger.error(`Failed to validate session: ${error.message}`);
+      throw new InternalServerErrorException('세션 검증 중 오류가 발생했습니다.');
+    }
+
+    if (!data) {
       throw new NotFoundException(ERROR_CODES.POMODORO_SESSION_NOT_FOUND);
     }
 
