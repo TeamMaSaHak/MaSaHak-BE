@@ -249,31 +249,31 @@ src/
 ## 성호가 먼저 해야 할 작업 (감귤 작업 전 필수)
 
 ### 1. 프로젝트 초기 설정
-- [ ] NestJS 프로젝트 생성
-- [ ] 폴더 구조 세팅
-- [ ] ESLint, Prettier 설정
-- [ ] .env 환경변수 설정
-- [ ] Git 저장소 생성
+- [x] NestJS 프로젝트 생성
+- [x] 폴더 구조 세팅
+- [x] ESLint, Prettier 설정
+- [x] .env 환경변수 설정
+- [x] Git 저장소 생성
 
 ### 2. Supabase 연동 설정
-- [ ] `@supabase/supabase-js` 패키지 설치
-- [ ] Supabase 모듈 생성 (`supabase.module.ts`)
-- [ ] Supabase 서비스 생성 (`supabase.service.ts`)
-- [ ] 환경변수에 Supabase URL, API Key 설정
-- [ ] **예시 CRUD 모듈 작성** (`health` 또는 `example` 모듈)
+- [x] `@supabase/supabase-js` 패키지 설치
+- [x] Supabase 모듈 생성 (`supabase.module.ts`)
+- [x] Supabase 서비스 생성 (`supabase.service.ts`)
+- [x] 환경변수에 Supabase URL, API Key 설정
+- [x] **예시 CRUD 모듈 작성** (`health` 또는 `example` 모듈)
 
 ### 3. 공통 모듈/유틸 작성
-- [ ] JWT 인증 Guard (`auth.guard.ts`)
-- [ ] 공통 Response DTO (`api-response.dto.ts`)
-- [ ] 공통 에러 핸들러 (Exception Filter)
-- [ ] Swagger 설정 (API 문서화)
-- [ ] **공통 에러 코드 정의** (`error-codes.ts`)
+- [x] JWT 인증 Guard (`auth.guard.ts`)
+- [x] 공통 Response DTO (`api-response.dto.ts`)
+- [x] 공통 에러 핸들러 (Exception Filter)
+- [x] Swagger 설정 (API 문서화)
+- [x] **공통 에러 코드 정의** (`error-codes.ts`)
 
 ### 4. 감귤에게 전달할 것
-- [ ] 프로젝트 Git 저장소 접근 권한
-- [ ] .env.example 파일 (환경변수 템플릿 + 주석)
+- [x] 프로젝트 Git 저장소 접근 권한
+- [x] .env.example 파일 (환경변수 템플릿 + 주석)
 - [ ] 예시 코드 설명 문서 (본 문서의 "감귤 시작 패키지" 참조)
-- [ ] Supabase 테이블 구조 공유 (`erd_final.md`)
+- [x] Supabase 테이블 구조 공유 (`erd_final.md`)
 - [ ] Slack/Discord 채널 개설 (실시간 질의응답용)
 
 ---
@@ -282,14 +282,14 @@ src/
 
 | 조건 | 상세 | 상태 |
 |------|------|:----:|
-| NestJS 프로젝트 세팅 완료 | 폴더 구조, ESLint, Prettier | ⬜ |
-| Supabase 연동 완료 | SupabaseService 동작 확인 | ⬜ |
-| 예시 모듈 제공 | health 또는 example CRUD 모듈 | ⬜ |
-| 공통 DTO/필터 완성 | Response DTO, Exception Filter | ⬜ |
-| .env.example 제공 | 환경변수 템플릿 + 실제 값 형식 주석 | ⬜ |
-| Git 접근 권한 부여 | 저장소 Collaborator 추가 | ⬜ |
+| NestJS 프로젝트 세팅 완료 | 폴더 구조, ESLint, Prettier | ✅ |
+| Supabase 연동 완료 | SupabaseService 동작 확인 | ✅ |
+| 예시 모듈 제공 | health 또는 example CRUD 모듈 | ✅ |
+| 공통 DTO/필터 완성 | Response DTO, Exception Filter | ✅ |
+| .env.example 제공 | 환경변수 템플릿 + 실제 값 형식 주석 | ✅ |
+| Git 접근 권한 부여 | 저장소 Collaborator 추가 | ✅ |
 
-**위 조건 모두 충족 후 감귤 작업 시작**
+**✅ 감귤 작업 시작 가능**
 
 ---
 
