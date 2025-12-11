@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, HttpStatus } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -15,6 +15,7 @@ import {
   StopPomodoroResponseDto,
   CycleCompleteRequestDto,
   CycleCompleteResponseDto,
+  PomodoroSettingsDto,
 } from './dto';
 import type { JwtPayload } from '../auth/interfaces';
 
@@ -111,6 +112,67 @@ export class PomodoroController {
     @Body() dto: CycleCompleteRequestDto,
   ): Promise<ApiResponseDto<CycleCompleteResponseDto>> {
     const result = await this.pomodoroService.cycleComplete(
+      user.sub,
+      user.guildId,
+      dto,
+    );
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  @Get('settings')
+  @ApiOperation({
+    summary: '뽀모도로 설정 조회',
+    description:
+      '사용자의 뽀모도로 설정을 조회합니다. 설정이 없으면 기본값(25분/5분/4회)을 반환합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '설정 조회 성공',
+    type: ApiResponseDto<PomodoroSettingsDto>,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '인증 실패',
+  })
+  async getSettings(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ApiResponseDto<PomodoroSettingsDto>> {
+    const result = await this.pomodoroService.getSettings(
+      user.sub,
+      user.guildId,
+    );
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  @Put('settings')
+  @ApiOperation({
+    summary: '뽀모도로 설정 저장',
+    description: '사용자의 뽀모도로 설정을 저장합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '설정 저장 성공',
+    type: ApiResponseDto<PomodoroSettingsDto>,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '인증 실패',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '잘못된 요청 데이터',
+  })
+  async updateSettings(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: PomodoroSettingsDto,
+  ): Promise<ApiResponseDto<PomodoroSettingsDto>> {
+    const result = await this.pomodoroService.updateSettings(
       user.sub,
       user.guildId,
       dto,
