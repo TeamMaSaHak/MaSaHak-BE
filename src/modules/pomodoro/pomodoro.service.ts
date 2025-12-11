@@ -13,6 +13,7 @@ import {
   StopPomodoroResponseDto,
   CycleCompleteRequestDto,
   CycleCompleteResponseDto,
+  PomodoroSettingsDto,
 } from './dto';
 import { ERROR_CODES } from '../../common/constants';
 
@@ -163,6 +164,55 @@ export class PomodoroService {
       cycleNumber: dto.cycleNumber,
       completedAt,
       hasNextCycle,
+    };
+  }
+
+  async getSettings(
+    userId: string,
+    guildId: string,
+  ): Promise<PomodoroSettingsDto> {
+    const settings = await this.getUserSettings(userId, guildId);
+    return {
+      focusTime: settings.focus_time,
+      breakTime: settings.break_time,
+      repeat: settings.repeat_count,
+    };
+  }
+
+  async updateSettings(
+    userId: string,
+    guildId: string,
+    settings: PomodoroSettingsDto,
+  ): Promise<PomodoroSettingsDto> {
+    const supabase = this.supabaseService.getClient();
+
+    const { data, error } = await supabase
+      .from('pomodoro_settings')
+      .upsert(
+        {
+          user_id: userId,
+          guild_id: guildId,
+          focus_time: settings.focusTime,
+          break_time: settings.breakTime,
+          repeat_count: settings.repeat,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id,guild_id',
+        },
+      )
+      .select('focus_time, break_time, repeat_count')
+      .single();
+
+    if (error) {
+      this.logger.error(`Failed to update settings: ${error.message}`);
+      throw new InternalServerErrorException('설정 저장에 실패했습니다.');
+    }
+
+    return {
+      focusTime: data.focus_time,
+      breakTime: data.break_time,
+      repeat: data.repeat_count,
     };
   }
 
