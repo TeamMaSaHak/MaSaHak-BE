@@ -29,7 +29,9 @@ export class AuthService {
 
   getDiscordOAuthUrl(): string {
     const clientId = this.configService.getOrThrow<string>('DISCORD_CLIENT_ID');
-    const redirectUri = this.configService.getOrThrow<string>('DISCORD_REDIRECT_URI');
+    const redirectUri = this.configService.getOrThrow<string>(
+      'DISCORD_REDIRECT_URI',
+    );
     const scope = encodeURIComponent('identify email guilds.members.read');
 
     return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}`;
@@ -37,8 +39,12 @@ export class AuthService {
 
   async exchangeCodeForTokens(code: string): Promise<DiscordTokenResponse> {
     const clientId = this.configService.getOrThrow<string>('DISCORD_CLIENT_ID');
-    const clientSecret = this.configService.getOrThrow<string>('DISCORD_CLIENT_SECRET');
-    const redirectUri = this.configService.getOrThrow<string>('DISCORD_REDIRECT_URI');
+    const clientSecret = this.configService.getOrThrow<string>(
+      'DISCORD_CLIENT_SECRET',
+    );
+    const redirectUri = this.configService.getOrThrow<string>(
+      'DISCORD_REDIRECT_URI',
+    );
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -69,7 +75,9 @@ export class AuthService {
     });
 
     if (!response.ok) {
-      throw new UnauthorizedException('Discord 사용자 정보를 가져올 수 없습니다.');
+      throw new UnauthorizedException(
+        'Discord 사용자 정보를 가져올 수 없습니다.',
+      );
     }
 
     return response.json();
