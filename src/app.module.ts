@@ -10,6 +10,7 @@ import { TimerModule } from './modules/timer/timer.module';
 import { PomodoroModule } from './modules/pomodoro/pomodoro.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { TodosModule } from './modules/todos/todos.module';
+import { DiaryModule } from './modules/diary/diary.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TodosModule } from './modules/todos/todos.module';
     PomodoroModule,
     CalendarModule,
     TodosModule,
+    DiaryModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
