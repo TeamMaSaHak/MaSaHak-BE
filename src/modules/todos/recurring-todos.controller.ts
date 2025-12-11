@@ -31,7 +31,7 @@ import {
 } from './dto';
 import type { JwtPayload } from '../auth/interfaces';
 
-@ApiTags('Todos')
+@ApiTags('Recurring Todos')
 @ApiBearerAuth('access-token')
 @Controller('todos/recurring')
 export class RecurringTodosController {
