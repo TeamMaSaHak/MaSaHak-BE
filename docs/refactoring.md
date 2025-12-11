@@ -31,5 +31,23 @@
 
 ---
 
+## Pomodoro Settings 모듈 (PR #8)
+
+### 1. DTO 필드명 일관성
+- **현재**: `repeat_count` → `repeat`
+- **제안**: `repeat_count` → `repeatCount`로 변경 (다른 필드와 일관성 유지)
+- **이유**: 다른 필드들은 DB 컬럼명을 camelCase로 변환하는 규칙을 따름
+  - `focus_time` → `focusTime` ✅
+  - `break_time` → `breakTime` ✅
+  - `repeat_count` → `repeat` ❌ (repeatCount여야 일관성 있음)
+- **수정 필요한 곳**:
+  - `src/modules/pomodoro/dto/pomodoro-settings.dto.ts:36` - `repeat` → `repeatCount`
+  - `src/modules/pomodoro/pomodoro.service.ts:178` - `repeat` → `repeatCount`
+  - `src/modules/pomodoro/pomodoro.service.ts:196` - `settings.repeat` → `settings.repeatCount`
+  - `src/modules/pomodoro/pomodoro.service.ts:213` - `repeat` → `repeatCount`
+
+---
+
 ## 참고
 - PR #5: https://github.com/TeamMaSaHak/MaSaHak-BE/pull/5
+- PR #8: https://github.com/TeamMaSaHak/MaSaHak-BE/pull/8
