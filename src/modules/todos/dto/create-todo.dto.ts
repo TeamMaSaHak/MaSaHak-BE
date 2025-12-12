@@ -24,7 +24,7 @@ export class CreateTodoResponseDto {
     description: '투두 ID',
     example: 'todo_3',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '투두 내용',

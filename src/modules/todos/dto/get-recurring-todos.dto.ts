@@ -5,7 +5,7 @@ export class RecurringTodoItemDto {
     description: '반복 투두 ID',
     example: 'recurring_1',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '반복 투두 내용',

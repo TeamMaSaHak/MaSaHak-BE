@@ -5,7 +5,7 @@ export class DeleteTodoResponseDto {
     description: '삭제된 투두 ID',
     example: 'todo_1',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '삭제일시',

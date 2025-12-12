@@ -6,7 +6,7 @@ export class TodoItemDto {
     description: '투두 ID',
     example: '1',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '투두 내용',

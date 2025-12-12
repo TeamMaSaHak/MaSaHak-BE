@@ -17,7 +17,7 @@ export class CreateRecurringTodoResponseDto {
     description: '반복 투두 ID',
     example: 'recurring_3',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '반복 투두 내용',

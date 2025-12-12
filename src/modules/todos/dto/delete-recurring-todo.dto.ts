@@ -5,7 +5,7 @@ export class DeleteRecurringTodoResponseDto {
     description: '삭제된 반복 투두 ID',
     example: 'recurring_1',
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: '삭제일시',
