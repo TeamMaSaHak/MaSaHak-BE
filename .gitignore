@@ -19,6 +19,7 @@ build/
 # Claude Code (개인 사용)
 .claude/
 CLAUDE.md
+TODO.md
 
 # Firebase (서비스 계정 키)
 firebase-service-account.json
