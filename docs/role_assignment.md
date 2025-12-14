@@ -31,7 +31,7 @@
 |--------|-----|------|
 | GET | `/api/todos` | 특정 날짜 투두 목록 조회 |
 | POST | `/api/todos` | 투두 생성 |
-| PUT | `/api/todos/{todoId}` | 투두 수정 |
+| PATCH | `/api/todos/{todoId}` | 투두 수정 |
 | DELETE | `/api/todos/{todoId}` | 투두 삭제 |
 | PATCH | `/api/todos/{todoId}/toggle` | 완료/미완료 토글 |
 
