@@ -53,6 +53,7 @@ async function bootstrap() {
     .addTag('Calendar', '캘린더')
     .addTag('Diary', '일기')
     .addTag('Notifications', '알림')
+    .addTag('Members', '회원/학생증')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
