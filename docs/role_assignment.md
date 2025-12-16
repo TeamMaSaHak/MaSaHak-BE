@@ -52,10 +52,16 @@
 #### 알림
 | Method | URL | 설명 |
 |--------|-----|------|
-| GET | `/api/notifications` | 알림 목록 조회 |
+| GET | `/api/notifications` | 알림 목록 조회 (페이지네이션) |
 | PATCH | `/api/notifications/{notificationId}/read` | 읽음 처리 |
 | PATCH | `/api/notifications/read-all` | 전체 읽음 처리 |
 | GET | `/api/notifications/unread-count` | 안읽은 알림 수 |
+
+**알림 목록 조회 쿼리 파라미터**:
+| 파라미터 | 타입 | 기본값 | 설명 |
+|----------|------|:------:|------|
+| `page` | number | 1 | 페이지 번호 |
+| `limit` | number | 20 | 페이지당 항목 수 |
 
 
 ---
