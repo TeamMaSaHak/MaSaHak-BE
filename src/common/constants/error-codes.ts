@@ -15,6 +15,8 @@ export const ERROR_CODES = {
   // Todos (감귤)
 
   // Diary (성호)
+  DIARY_LOCKED: 'DIARY_LOCKED',
+  DIARY_NOT_FOUND: 'DIARY_NOT_FOUND',
 
   // Notifications (감귤)
 
