@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SupabaseModule } from './database/supabase';
+import { FirebaseModule } from './database/firebase';
 import { JwtAuthGuard } from './common/guards';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -13,6 +14,7 @@ import { TodosModule } from './modules/todos/todos.module';
 import { DiaryModule } from './modules/diary/diary.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MembersModule } from './modules/members/members.module';
+import { DevicesModule } from './modules/devices/devices.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { MembersModule } from './modules/members/members.module';
     ScheduleModule.forRoot(),
     // Supabase 모듈
     SupabaseModule,
+    // Firebase 모듈
+    FirebaseModule,
     // 기능 모듈
     HealthModule,
     AuthModule,
@@ -35,6 +39,7 @@ import { MembersModule } from './modules/members/members.module';
     DiaryModule,
     NotificationsModule,
     MembersModule,
+    DevicesModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
