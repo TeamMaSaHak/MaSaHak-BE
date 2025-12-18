@@ -17,6 +17,7 @@ import { MembersModule } from './modules/members/members.module';
 import { DevicesModule } from './modules/devices/devices.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { TermsModule } from './modules/terms/terms.module';
+import { BatchModule } from './modules/batch/batch.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { TermsModule } from './modules/terms/terms.module';
     DevicesModule,
     SettingsModule,
     TermsModule,
+    BatchModule,
   ],
   providers: [
     // 전역 JWT Guard (Public 데코레이터로 예외 처리)
