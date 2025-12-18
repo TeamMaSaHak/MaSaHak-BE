@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { AuthTokensDto } from './auth-tokens.dto';
 
 export class UserProfileDto {
@@ -46,6 +47,8 @@ export class LoginResponseDto {
 
 export class RefreshTokenRequestDto {
   @ApiProperty({ description: 'Refresh Token', example: 'refresh_token_here' })
+  @IsString({ message: 'refreshToken은 문자열이어야 합니다.' })
+  @IsNotEmpty({ message: 'refreshToken은 필수입니다.' })
   refreshToken: string;
 }
 
