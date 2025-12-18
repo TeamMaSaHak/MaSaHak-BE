@@ -7,6 +7,9 @@ import { GlobalExceptionFilter } from './common/filters';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // 전역 API prefix 설정
+  app.setGlobalPrefix('api');
+
   // CORS 설정
   app.enableCors({
     origin: true,
@@ -50,6 +53,7 @@ async function bootstrap() {
     .addTag('Calendar', '캘린더')
     .addTag('Diary', '일기')
     .addTag('Notifications', '알림')
+    .addTag('Members', '회원/학생증')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
