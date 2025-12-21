@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Param,
   Body,
@@ -13,9 +14,11 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger';
 import { DiaryService } from './diary.service';
-import { CurrentUser } from '../../common/decorators';
+import { LlmService } from '../llm/llm.service';
+import { CurrentUser, Public } from '../../common/decorators';
 import { ApiResponseDto } from '../../common/dto';
 import {
   GetDiaryParamsDto,
@@ -30,7 +33,10 @@ import type { JwtPayload } from '../auth/interfaces';
 @ApiBearerAuth('access-token')
 @Controller('diary')
 export class DiaryController {
-  constructor(private readonly diaryService: DiaryService) {}
+  constructor(
+    private readonly diaryService: DiaryService,
+    private readonly llmService: LlmService,
+  ) {}
 
   @Get(':date')
   @ApiOperation({
@@ -110,6 +116,38 @@ export class DiaryController {
     return {
       success: true,
       data: result,
+    };
+  }
+
+  @Public()
+  @Post('test-llm')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '[DEV] LLM 답장 테스트',
+    description: '개발용: LLM 답장 생성을 테스트합니다.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        content: {
+          type: 'string',
+          example: '오늘은 NestJS를 공부했다. 처음엔 어려웠지만 점점 재미있어지고 있다.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'LLM 답장 생성 성공',
+  })
+  async testLlm(
+    @Body() body: { content: string },
+  ): Promise<ApiResponseDto<{ reply: string | null }>> {
+    const reply = await this.llmService.generateDiaryReply(body.content);
+    return {
+      success: true,
+      data: { reply },
     };
   }
 }
