@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { SupabaseService } from '../../database/supabase';
 import { FirebaseService } from '../../database/firebase';
+import { LlmService } from '../llm/llm.service';
 import { format, subDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 
@@ -13,6 +14,7 @@ export class BatchService {
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly firebaseService: FirebaseService,
+    private readonly llmService: LlmService,
   ) {}
 
   /**
@@ -276,26 +278,11 @@ export class BatchService {
   }
 
   /**
-   * LLM 답장 생성 (placeholder)
-   * TODO: 실제 LLM API (OpenAI, Anthropic 등) 연동
+   * LLM 답장 생성
+   * LlmService를 통해 Gemini API 호출
    */
   private async generateLLMReply(diaryContent: string): Promise<string | null> {
-    if (!diaryContent || diaryContent.trim().length === 0) {
-      return null;
-    }
-
-    // TODO: 실제 LLM API 연동
-    // 현재는 placeholder 메시지 반환
-    const replies = [
-      '오늘 하루도 수고했어요! 내일은 더 좋은 하루가 될 거예요.',
-      '열심히 공부한 하루였네요. 충분히 쉬고 내일도 파이팅!',
-      '오늘의 노력이 내일의 성장이 됩니다. 잘하고 있어요!',
-      '힘든 하루였을 수도 있지만, 그래도 일기를 쓰는 당신은 대단해요.',
-      '오늘 하루를 돌아보는 시간, 정말 소중하죠. 내일도 응원할게요!',
-    ];
-
-    const randomIndex = Math.floor(Math.random() * replies.length);
-    return replies[randomIndex];
+    return this.llmService.generateDiaryReply(diaryContent);
   }
 
   /**
