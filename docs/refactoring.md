@@ -31,6 +31,19 @@
 
 ---
 
+## Todos 모듈 (PR #7)
+
+### 1. ID 타입 통일 검토 (number vs string)
+- **현재**: `todoId`, `recurringId`가 string으로 처리
+- **코멘트**: 순차 증가 ID이므로 number로 통일해야 하지 않을까?
+- **고려사항**:
+  - DB가 int8(bigint)인 경우 JavaScript number의 정밀도 한계(2^53-1)로 인해 string이 안전
+  - 현재 ID 값이 작아서 당장은 문제없지만, 규모가 커지면 이슈 발생 가능
+- **액션**: 팀 협의 후 결정 (현재는 string 유지가 안전할 수 있음)
+- **파일**: `src/modules/todos/dto/`, `src/modules/todos/todos.controller.ts`
+
+---
+
 ## Pomodoro Settings 모듈 (PR #8)
 
 ### 1. DTO 필드명 일관성
@@ -50,4 +63,5 @@
 
 ## 참고
 - PR #5: https://github.com/TeamMaSaHak/MaSaHak-BE/pull/5
+- PR #7: https://github.com/TeamMaSaHak/MaSaHak-BE/pull/7
 - PR #8: https://github.com/TeamMaSaHak/MaSaHak-BE/pull/8
