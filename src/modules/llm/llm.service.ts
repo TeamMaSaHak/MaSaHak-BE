@@ -145,8 +145,12 @@ export class LlmService implements OnModuleInit {
   /**
    * 일기 내용을 기반으로 LLM 답장 생성
    * 4가지 컨셉 중 랜덤으로 하나를 선택하여 답장 생성
+   * @param conceptIndex 특정 컨셉 인덱스 (0-3), 미지정시 랜덤
    */
-  async generateDiaryReply(diaryContent: string): Promise<string | null> {
+  async generateDiaryReply(
+    diaryContent: string,
+    conceptIndex?: number,
+  ): Promise<string | null> {
     if (!diaryContent || diaryContent.trim().length === 0) {
       return null;
     }
@@ -156,7 +160,10 @@ export class LlmService implements OnModuleInit {
       return this.getFallbackReply();
     }
 
-    const concept = this.selectRandomConcept();
+    const concept =
+      conceptIndex !== undefined && conceptIndex >= 0 && conceptIndex < 4
+        ? LETTER_CONCEPTS[conceptIndex]
+        : this.selectRandomConcept();
     const prompt = this.buildPrompt(concept, diaryContent);
 
     try {

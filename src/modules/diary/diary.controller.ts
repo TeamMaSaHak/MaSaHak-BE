@@ -7,6 +7,7 @@ import {
   Body,
   HttpStatus,
   HttpCode,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -124,7 +125,7 @@ export class DiaryController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '[DEV] LLM 답장 테스트',
-    description: '개발용: LLM 답장 생성을 테스트합니다.',
+    description: '개발용: LLM 답장 생성을 테스트합니다. 프로덕션 환경에서는 사용 불가.',
   })
   @ApiBody({
     schema: {
@@ -134,6 +135,11 @@ export class DiaryController {
           type: 'string',
           example: '오늘은 NestJS를 공부했다. 처음엔 어려웠지만 점점 재미있어지고 있다.',
         },
+        conceptIndex: {
+          type: 'number',
+          example: 0,
+          description: '0: 바람, 1: 흙내음, 2: 북극, 3: 남극 (미지정시 랜덤)',
+        },
       },
     },
   })
@@ -141,10 +147,21 @@ export class DiaryController {
     status: HttpStatus.OK,
     description: 'LLM 답장 생성 성공',
   })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: '프로덕션 환경에서는 사용 불가',
+  })
   async testLlm(
-    @Body() body: { content: string },
+    @Body() body: { content: string; conceptIndex?: number },
   ): Promise<ApiResponseDto<{ reply: string | null }>> {
-    const reply = await this.llmService.generateDiaryReply(body.content);
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('This endpoint is not available in production');
+    }
+
+    const reply = await this.llmService.generateDiaryReply(
+      body.content,
+      body.conceptIndex,
+    );
     return {
       success: true,
       data: { reply },
