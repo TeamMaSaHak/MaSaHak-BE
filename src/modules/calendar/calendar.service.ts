@@ -100,11 +100,12 @@ export class CalendarService {
       }
     }
 
-    // 활동이 있는 날짜만 반환 (공부 시간 > 0 또는 일기 작성)
+    // 해당 월의 모든 날짜 반환
     const days: CalendarDayDto[] = [];
-    const allDates = new Set([...studyTimeByDate.keys(), ...diaryDates]);
+    const totalDaysInMonth = getDaysInMonth(targetDate);
 
-    for (const date of allDates) {
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+      const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd');
       days.push({
         date,
         totalMinutes: studyTimeByDate.get(date) || 0,
