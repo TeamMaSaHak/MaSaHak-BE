@@ -86,7 +86,7 @@ export class CalendarService {
         const date = format(parseISO(startedAt), 'yyyy-MM-dd');
         const currentMinutes = studyTimeByDate.get(date) || 0;
         const durationSeconds = (session.duration_seconds as number) || 0;
-        const sessionMinutes = Math.floor(durationSeconds / 60);
+        const sessionMinutes = this.convertSecondsToMinutes(durationSeconds);
         studyTimeByDate.set(date, currentMinutes + sessionMinutes);
       }
     }
@@ -181,7 +181,7 @@ export class CalendarService {
     if (todaySessions && todaySessions.length > 0) {
       for (const session of todaySessions) {
         const durationSeconds = (session.duration_seconds as number) || 0;
-        const sessionMinutes = Math.floor(durationSeconds / 60);
+        const sessionMinutes = this.convertSecondsToMinutes(durationSeconds);
         totalMinutes += sessionMinutes;
 
         if (sessionMinutes > longestSessionMinutes) {
@@ -201,7 +201,7 @@ export class CalendarService {
     if (yesterdaySessions) {
       for (const session of yesterdaySessions) {
         const durationSeconds = (session.duration_seconds as number) || 0;
-        yesterdayTotalMinutes += Math.floor(durationSeconds / 60);
+        yesterdayTotalMinutes += this.convertSecondsToMinutes(durationSeconds);
       }
     }
 
@@ -284,7 +284,7 @@ export class CalendarService {
         studyDates.add(date);
 
         const durationSeconds = (session.duration_seconds as number) || 0;
-        totalMinutes += Math.floor(durationSeconds / 60);
+        totalMinutes += this.convertSecondsToMinutes(durationSeconds);
       }
     }
 
@@ -302,5 +302,9 @@ export class CalendarService {
       averageMinutesPerDay,
       completedTodos,
     };
+  }
+
+  private convertSecondsToMinutes(seconds: number): number {
+    return Math.floor(seconds / 60);
   }
 }
