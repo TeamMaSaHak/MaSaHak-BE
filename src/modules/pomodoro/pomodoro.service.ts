@@ -175,7 +175,7 @@ export class PomodoroService {
     return {
       focusTime: settings.focus_time,
       breakTime: settings.break_time,
-      repeat: settings.repeat_count,
+      repeatCount: settings.repeat_count,
     };
   }
 
@@ -194,7 +194,7 @@ export class PomodoroService {
           guild_id: guildId,
           focus_time: settings.focusTime,
           break_time: settings.breakTime,
-          repeat_count: settings.repeat,
+          repeat_count: settings.repeatCount,
           updated_at: new Date().toISOString(),
         },
         {
@@ -212,7 +212,7 @@ export class PomodoroService {
     return {
       focusTime: data.focus_time,
       breakTime: data.break_time,
-      repeat: data.repeat_count,
+      repeatCount: data.repeat_count,
     };
   }
 

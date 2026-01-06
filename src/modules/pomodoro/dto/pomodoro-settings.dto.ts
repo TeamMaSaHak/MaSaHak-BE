@@ -33,5 +33,5 @@ export class PomodoroSettingsDto {
   @IsInt()
   @Min(1)
   @Max(10)
-  repeat: number;
+  repeatCount: number;
 }
