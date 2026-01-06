@@ -10,19 +10,26 @@ import {
   DiaryReplyDto,
   UpsertDiaryResponseDto,
 } from './dto';
-import { parseISO, addDays, isAfter, isBefore } from 'date-fns';
 import { ERROR_CODES } from '../../common/constants/error-codes';
+import {
+  canEditDiary as canEditDiaryUtil,
+  canShowReply as canShowReplyUtil,
+} from '../../common/utils';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class DiaryService {
   private readonly logger = new Logger(DiaryService.name);
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly settingsService: SettingsService,
+  ) {}
 
   /**
    * 일기 조회
    * - 해당 날짜의 일기와 답장을 조회
-   * - 답장은 09:00 이후에만 노출
+   * - 답장은 09:00 이후에만 노출 (사용자 타임존 기준)
    */
   async getDiary(
     userId: string,
@@ -30,6 +37,12 @@ export class DiaryService {
     date: string,
   ): Promise<GetDiaryResponseDto> {
     const supabase = this.supabaseService.getClient();
+
+    // 사용자 타임존 조회
+    const timezone = await this.settingsService.getUserTimezone(
+      userId,
+      guildId,
+    );
 
     const { data: diary, error: diaryError } = await supabase
       .from('diaries')
@@ -60,8 +73,9 @@ export class DiaryService {
       );
     }
 
-    const canEdit = this.canEditDiary(date);
-    const canShowReply = this.canShowReply(date);
+    // 사용자 타임존 기준으로 수정 가능 여부 및 답장 노출 여부 확인
+    const canEdit = canEditDiaryUtil(date, timezone);
+    const canShowReply = canShowReplyUtil(date, timezone);
 
     // 일기가 없는 경우
     if (!diary) {
@@ -108,7 +122,7 @@ export class DiaryService {
   /**
    * 일기 작성/수정
    * - 당일 06:00 ~ 다음날 05:59까지만 가능
-   * - 서버 시간 기준으로 검증
+   * - 사용자 타임존 기준으로 검증
    */
   async upsertDiary(
     userId: string,
@@ -118,8 +132,14 @@ export class DiaryService {
   ): Promise<UpsertDiaryResponseDto> {
     const supabase = this.supabaseService.getClient();
 
-    // 수정 가능 시간 검증
-    if (!this.canEditDiary(date)) {
+    // 사용자 타임존 조회
+    const timezone = await this.settingsService.getUserTimezone(
+      userId,
+      guildId,
+    );
+
+    // 수정 가능 시간 검증 (사용자 타임존 기준)
+    if (!canEditDiaryUtil(date, timezone)) {
       throw new ForbiddenException({
         message: '작성 시간이 지났습니다. 입력 시간은 다음날 05:59분까지 입니다.',
         errorCode: ERROR_CODES.DIARY_LOCKED,
@@ -209,61 +229,5 @@ export class DiaryService {
       isCreated: true,
       savedAt: newDiary.created_at as string,
     };
-  }
-
-  /**
-   * 일기 수정 가능 여부 확인
-   * - 해당 날짜 06:00 ~ 다음날 05:59까지 수정 가능
-   * - 서버 시간 기준
-   */
-  private canEditDiary(diaryDate: string): boolean {
-    const now = new Date();
-    const targetDate = parseISO(diaryDate);
-
-    // 일기 작성 시작 시간: 해당 날짜 06:00
-    const editStartTime = new Date(
-      targetDate.getFullYear(),
-      targetDate.getMonth(),
-      targetDate.getDate(),
-      6,
-      0,
-      0,
-    );
-
-    // 일기 작성 종료 시간: 다음날 06:00
-    const nextDay = addDays(targetDate, 1);
-    const editEndTime = new Date(
-      nextDay.getFullYear(),
-      nextDay.getMonth(),
-      nextDay.getDate(),
-      6,
-      0,
-      0,
-    );
-
-    return !isBefore(now, editStartTime) && isBefore(now, editEndTime);
-  }
-
-  /**
-   * 답장 노출 가능 여부 확인
-   * - 해당 날짜 다음날 09:00 이후부터 노출
-   * - 서버 시간 기준
-   */
-  private canShowReply(diaryDate: string): boolean {
-    const now = new Date();
-    const targetDate = parseISO(diaryDate);
-
-    // 답장 노출 시작 시간: 다음날 09:00
-    const nextDay = addDays(targetDate, 1);
-    const replyShowTime = new Date(
-      nextDay.getFullYear(),
-      nextDay.getMonth(),
-      nextDay.getDate(),
-      9,
-      0,
-      0,
-    );
-
-    return isAfter(now, replyShowTime);
   }
 }

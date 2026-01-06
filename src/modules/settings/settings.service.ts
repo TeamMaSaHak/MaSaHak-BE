@@ -2,13 +2,18 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from '../../database/supabase';
 import {
   NotificationSettingsResponseDto,
   UpdateNotificationSettingsRequestDto,
   UpdateNotificationSettingsResponseDto,
+  TimezoneSettingsResponseDto,
+  UpdateTimezoneRequestDto,
+  UpdateTimezoneResponseDto,
 } from './dto';
+import { isValidTimezone, DEFAULT_TIMEZONE } from '../../common/utils';
 
 @Injectable()
 export class SettingsService {
@@ -110,5 +115,86 @@ export class SettingsService {
   async isPushEnabled(userId: string, guildId: string): Promise<boolean> {
     const settings = await this.getNotificationSettings(userId, guildId);
     return settings.pushEnabled;
+  }
+
+  /**
+   * 타임존 조회
+   */
+  async getTimezone(
+    userId: string,
+    guildId: string,
+  ): Promise<TimezoneSettingsResponseDto> {
+    const supabase = this.supabaseService.getClient();
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('timezone, last_seen_at')
+      .eq('user_id', userId)
+      .eq('guild_id', guildId)
+      .single();
+
+    if (error) {
+      this.logger.error(`Failed to get timezone: ${error.message}`);
+      throw new InternalServerErrorException(
+        '타임존 조회 중 오류가 발생했습니다.',
+      );
+    }
+
+    return {
+      timezone: data?.timezone || DEFAULT_TIMEZONE,
+      updatedAt: data?.last_seen_at || null,
+    };
+  }
+
+  /**
+   * 타임존 변경
+   */
+  async updateTimezone(
+    userId: string,
+    guildId: string,
+    dto: UpdateTimezoneRequestDto,
+  ): Promise<UpdateTimezoneResponseDto> {
+    // 유효성 검증
+    if (!isValidTimezone(dto.timezone)) {
+      throw new BadRequestException('유효하지 않은 타임존입니다.');
+    }
+
+    const supabase = this.supabaseService.getClient();
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        timezone: dto.timezone,
+        last_seen_at: now,
+      })
+      .eq('user_id', userId)
+      .eq('guild_id', guildId)
+      .select('timezone, last_seen_at')
+      .single();
+
+    if (error) {
+      this.logger.error(`Failed to update timezone: ${error.message}`);
+      throw new InternalServerErrorException(
+        '타임존 변경 중 오류가 발생했습니다.',
+      );
+    }
+
+    this.logger.log(
+      `Timezone updated for user ${userId}: timezone=${dto.timezone}`,
+    );
+
+    return {
+      timezone: data.timezone,
+      updatedAt: data.last_seen_at,
+    };
+  }
+
+  /**
+   * 사용자 타임존 조회 (다른 모듈에서 호출용)
+   */
+  async getUserTimezone(userId: string, guildId: string): Promise<string> {
+    const settings = await this.getTimezone(userId, guildId);
+    return settings.timezone;
   }
 }
