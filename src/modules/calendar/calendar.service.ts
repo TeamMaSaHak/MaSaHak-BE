@@ -86,7 +86,7 @@ export class CalendarService {
         const date = format(parseISO(startedAt), 'yyyy-MM-dd');
         const currentMinutes = studyTimeByDate.get(date) || 0;
         const durationSeconds = (session.duration_seconds as number) || 0;
-        const sessionMinutes = Math.floor(durationSeconds / 60);
+        const sessionMinutes = this.convertSecondsToMinutes(durationSeconds);
         studyTimeByDate.set(date, currentMinutes + sessionMinutes);
       }
     }
@@ -100,11 +100,12 @@ export class CalendarService {
       }
     }
 
-    // 활동이 있는 날짜만 반환 (공부 시간 > 0 또는 일기 작성)
+    // 해당 월의 모든 날짜 반환
     const days: CalendarDayDto[] = [];
-    const allDates = new Set([...studyTimeByDate.keys(), ...diaryDates]);
+    const totalDaysInMonth = getDaysInMonth(targetDate);
 
-    for (const date of allDates) {
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+      const date = format(new Date(year, month - 1, day), 'yyyy-MM-dd');
       days.push({
         date,
         totalMinutes: studyTimeByDate.get(date) || 0,
@@ -180,7 +181,7 @@ export class CalendarService {
     if (todaySessions && todaySessions.length > 0) {
       for (const session of todaySessions) {
         const durationSeconds = (session.duration_seconds as number) || 0;
-        const sessionMinutes = Math.floor(durationSeconds / 60);
+        const sessionMinutes = this.convertSecondsToMinutes(durationSeconds);
         totalMinutes += sessionMinutes;
 
         if (sessionMinutes > longestSessionMinutes) {
@@ -200,7 +201,7 @@ export class CalendarService {
     if (yesterdaySessions) {
       for (const session of yesterdaySessions) {
         const durationSeconds = (session.duration_seconds as number) || 0;
-        yesterdayTotalMinutes += Math.floor(durationSeconds / 60);
+        yesterdayTotalMinutes += this.convertSecondsToMinutes(durationSeconds);
       }
     }
 
@@ -283,7 +284,7 @@ export class CalendarService {
         studyDates.add(date);
 
         const durationSeconds = (session.duration_seconds as number) || 0;
-        totalMinutes += Math.floor(durationSeconds / 60);
+        totalMinutes += this.convertSecondsToMinutes(durationSeconds);
       }
     }
 
@@ -301,5 +302,9 @@ export class CalendarService {
       averageMinutesPerDay,
       completedTodos,
     };
+  }
+
+  private convertSecondsToMinutes(seconds: number): number {
+    return Math.floor(seconds / 60);
   }
 }
