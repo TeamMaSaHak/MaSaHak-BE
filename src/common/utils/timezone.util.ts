@@ -1,7 +1,12 @@
 import { format, parseISO, addDays, isBefore, isAfter } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 export const DEFAULT_TIMEZONE = 'Asia/Seoul';
+
+// 시간 상수
+const DIARY_EDIT_START_HOUR = 6; // 일기 작성 시작 시간 (06:00)
+const DIARY_EDIT_END_HOUR = 6; // 일기 작성 종료 시간 (다음날 06:00)
+const REPLY_SHOW_HOUR = 9; // 답장 노출 시작 시간 (09:00)
 
 /**
  * 사용자 타임존 기준 오늘 날짜 (yyyy-MM-dd)
@@ -34,29 +39,17 @@ export function getCurrentTimeInTimezone(timezone: string): Date {
  * - 해당 날짜 06:00 ~ 다음날 05:59까지 수정 가능
  */
 export function canEditDiary(diaryDate: string, timezone: string): boolean {
-  const now = getCurrentTimeInTimezone(timezone);
+  const now = new Date(); // UTC 기준 현재 시간
   const targetDate = parseISO(diaryDate);
-
-  // 일기 작성 시작 시간: 해당 날짜 06:00 (사용자 타임존)
-  const editStartTime = new Date(
-    targetDate.getFullYear(),
-    targetDate.getMonth(),
-    targetDate.getDate(),
-    6,
-    0,
-    0,
-  );
-
-  // 일기 작성 종료 시간: 다음날 06:00 (사용자 타임존)
   const nextDay = addDays(targetDate, 1);
-  const editEndTime = new Date(
-    nextDay.getFullYear(),
-    nextDay.getMonth(),
-    nextDay.getDate(),
-    6,
-    0,
-    0,
-  );
+
+  // 사용자 타임존의 시간을 UTC로 변환하여 비교
+  const editStartTimeStr = `${diaryDate}T${String(DIARY_EDIT_START_HOUR).padStart(2, '0')}:00:00`;
+  const editStartTime = fromZonedTime(editStartTimeStr, timezone);
+
+  const nextDayStr = format(nextDay, 'yyyy-MM-dd');
+  const editEndTimeStr = `${nextDayStr}T${String(DIARY_EDIT_END_HOUR).padStart(2, '0')}:00:00`;
+  const editEndTime = fromZonedTime(editEndTimeStr, timezone);
 
   return !isBefore(now, editStartTime) && isBefore(now, editEndTime);
 }
@@ -66,19 +59,14 @@ export function canEditDiary(diaryDate: string, timezone: string): boolean {
  * - 해당 날짜 다음날 09:00 이후부터 노출
  */
 export function canShowReply(diaryDate: string, timezone: string): boolean {
-  const now = getCurrentTimeInTimezone(timezone);
+  const now = new Date(); // UTC 기준 현재 시간
   const targetDate = parseISO(diaryDate);
-
-  // 답장 노출 시작 시간: 다음날 09:00 (사용자 타임존)
   const nextDay = addDays(targetDate, 1);
-  const replyShowTime = new Date(
-    nextDay.getFullYear(),
-    nextDay.getMonth(),
-    nextDay.getDate(),
-    9,
-    0,
-    0,
-  );
+
+  // 사용자 타임존의 시간을 UTC로 변환하여 비교
+  const nextDayStr = format(nextDay, 'yyyy-MM-dd');
+  const replyShowTimeStr = `${nextDayStr}T${String(REPLY_SHOW_HOUR).padStart(2, '0')}:00:00`;
+  const replyShowTime = fromZonedTime(replyShowTimeStr, timezone);
 
   return isAfter(now, replyShowTime);
 }
