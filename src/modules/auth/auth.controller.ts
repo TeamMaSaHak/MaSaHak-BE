@@ -54,6 +54,12 @@ export class AuthController {
       'Discord OAuth 콜백을 처리하고 JWT 토큰을 발급합니다. 프론트엔드에서 code를 전달받아 처리합니다.',
   })
   @ApiQuery({ name: 'code', description: 'Discord OAuth 인증 코드' })
+  @ApiQuery({
+    name: 'timezone',
+    description: '사용자 타임존 (IANA 타임존)',
+    required: false,
+    example: 'Asia/Seoul',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: '로그인 성공',
@@ -65,8 +71,9 @@ export class AuthController {
   })
   async discordCallback(
     @Query('code') code: string,
+    @Query('timezone') timezone?: string,
   ): Promise<ApiResponseDto<LoginResponseDto>> {
-    const result = await this.authService.handleDiscordCallback(code);
+    const result = await this.authService.handleDiscordCallback(code, timezone);
     return {
       success: true,
       data: result,

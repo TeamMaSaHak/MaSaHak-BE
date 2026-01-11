@@ -32,6 +32,13 @@ export class UserProfileDto {
 
   @ApiProperty({ description: '레벨명', example: '마법학도' })
   levelName: string;
+
+  @ApiProperty({
+    description: '타임존',
+    example: 'Asia/Seoul',
+    default: 'Asia/Seoul',
+  })
+  timezone: string;
 }
 
 export class LoginResponseDto {

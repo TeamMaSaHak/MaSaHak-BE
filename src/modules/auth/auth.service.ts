@@ -15,6 +15,7 @@ import {
   VerifyMemberResponseDto,
 } from './dto';
 import { ERROR_CODES } from '../../common/constants';
+import { isValidTimezone, DEFAULT_TIMEZONE } from '../../common/utils';
 
 @Injectable()
 export class AuthService {
@@ -104,8 +105,15 @@ export class AuthService {
     return response.json();
   }
 
-  async handleDiscordCallback(code: string): Promise<LoginResponseDto> {
+  async handleDiscordCallback(
+    code: string,
+    timezone?: string,
+  ): Promise<LoginResponseDto> {
     const guildId = this.configService.getOrThrow<string>('DISCORD_GUILD_ID');
+
+    // timezone 유효성 검증 (명시적으로 전달된 경우에만 유효한 값 사용)
+    const validTimezone =
+      timezone && isValidTimezone(timezone) ? timezone : undefined;
 
     const discordTokens = await this.exchangeCodeForTokens(code);
     const discordUser = await this.getDiscordUser(discordTokens.access_token);
@@ -116,7 +124,12 @@ export class AuthService {
 
     const isMember = guildMember !== null;
 
-    const user = await this.upsertUser(discordUser, guildMember, guildId);
+    const user = await this.upsertUser(
+      discordUser,
+      guildMember,
+      guildId,
+      validTimezone,
+    );
 
     const tokens = await this.generateTokens({
       sub: discordUser.id,
@@ -216,6 +229,7 @@ export class AuthService {
     discordUser: DiscordUser,
     guildMember: DiscordGuildMember | null,
     guildId: string,
+    timezone?: string,
   ): Promise<UserProfileDto> {
     const supabase = this.supabaseService.getClient();
 
@@ -233,14 +247,22 @@ export class AuthService {
       : null;
 
     if (existingUser) {
+      // 기존 사용자: timezone이 명시적으로 전달된 경우에만 업데이트, 아니면 기존 값 유지
+      const updateData: Record<string, unknown> = {
+        nickname,
+        profile_image: profileImage,
+        status: guildMember ? 'active' : 'left',
+        last_seen_at: new Date().toISOString(),
+      };
+
+      // timezone이 명시적으로 전달된 경우에만 업데이트
+      if (timezone) {
+        updateData.timezone = timezone;
+      }
+
       const { data: updatedUser, error } = await supabase
         .from('users')
-        .update({
-          nickname,
-          profile_image: profileImage,
-          status: guildMember ? 'active' : 'left',
-          last_seen_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('user_id', discordUser.id)
         .eq('guild_id', guildId)
         .select()
@@ -254,6 +276,7 @@ export class AuthService {
       return this.mapUserToProfile(updatedUser);
     }
 
+    // 신규 사용자: timezone 저장 (없으면 기본값 사용)
     const { data: newUser, error } = await supabase
       .from('users')
       .insert({
@@ -262,6 +285,7 @@ export class AuthService {
         nickname,
         profile_image: profileImage,
         status: guildMember ? 'active' : 'left',
+        timezone: timezone || DEFAULT_TIMEZONE,
         joined_at: guildMember?.joined_at
           ? new Date(guildMember.joined_at).toISOString().split('T')[0]
           : null,
@@ -288,6 +312,7 @@ export class AuthService {
       dormitory: user.dormitory as string | undefined,
       level: (user.level as number) || 1,
       levelName: (user.level_name as string) || '마법학도',
+      timezone: (user.timezone as string) || DEFAULT_TIMEZONE,
     };
   }
 }
