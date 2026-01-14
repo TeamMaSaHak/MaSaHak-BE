@@ -1,19 +1,17 @@
-# 백엔드 API 개발 완료 공지
+# 백엔드 API 명세서
 
-> 작성일: 2025-12-19
-
-안녕하세요! 백엔드 API 개발이 완료되어 공지드립니다.
+> 최종 수정일: 2026-01-14
 
 ---
 
-## 완료된 API 목록
+## API 목록
 
 ### 인증 (Auth)
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
-| `/api/auth/discord` | GET | 공개 | Discord OAuth 로그인 시작 |
-| `/api/auth/discord/callback` | GET | 공개 | OAuth 콜백 + JWT 발급 |
+| `/api/auth/discord` | GET | 공개 | Discord OAuth 로그인 시작 (리다이렉트) |
+| `/api/auth/discord/callback` | GET | 공개 | OAuth 콜백 + JWT 발급 (query: code, timezone?) |
 | `/api/auth/verify-member` | GET | 필수 | 서버 멤버 검증 |
 | `/api/auth/refresh` | POST | 공개 | Access Token 갱신 |
 | `/api/auth/logout` | POST | 필수 | 로그아웃 |
@@ -41,15 +39,15 @@
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
+| `/api/calendar/stats/monthly` | GET | 필수 | 월별 통계 (query: year, month) |
+| `/api/calendar/stats/daily` | GET | 필수 | 일별 통계 (query: date) |
 | `/api/calendar/{year}/{month}` | GET | 필수 | 월별 캘린더 데이터 |
-| `/api/calendar/stats/daily` | GET | 필수 | 일별 통계 |
-| `/api/calendar/stats/monthly` | GET | 필수 | 월별 통계 |
 
 ### 투두 (Todos)
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
-| `/api/todos?date=YYYY-MM-DD` | GET | 필수 | 특정 날짜 투두 목록 |
+| `/api/todos` | GET | 필수 | 특정 날짜 투두 목록 (query: date) |
 | `/api/todos` | POST | 필수 | 투두 생성 |
 | `/api/todos/{todoId}` | PATCH | 필수 | 투두 수정 |
 | `/api/todos/{todoId}` | DELETE | 필수 | 투두 삭제 |
@@ -68,17 +66,18 @@
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
-| `/api/diary/{date}` | GET | 필수 | 일기 조회 |
-| `/api/diary/{date}` | PUT | 필수 | 일기 작성/수정 |
+| `/api/diary/{date}` | GET | 필수 | 일기 조회 (답장은 다음날 09:00 이후 노출) |
+| `/api/diary/{date}` | PUT | 필수 | 일기 작성/수정 (당일 06:00 ~ 익일 05:59) |
+| `/api/diary/test-llm` | POST | 공개 | [DEV] LLM 답장 테스트 (개발환경만) |
 
 ### 알림 (Notifications)
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
 | `/api/notifications` | GET | 필수 | 알림 목록 (페이지네이션) |
+| `/api/notifications/unread-count` | GET | 필수 | 안읽은 알림 수 |
 | `/api/notifications/{notificationId}/read` | PATCH | 필수 | 읽음 처리 |
 | `/api/notifications/read-all` | PATCH | 필수 | 전체 읽음 처리 |
-| `/api/notifications/unread-count` | GET | 필수 | 안읽은 알림 수 |
 
 ### 회원 (Members)
 
@@ -98,19 +97,21 @@
 |-----------|:------:|:----:|------|
 | `/api/settings/notifications` | GET | 필수 | 알림 설정 조회 |
 | `/api/settings/notifications` | PUT | 필수 | 알림 설정 변경 |
+| `/api/settings/timezone` | GET | 필수 | 타임존 설정 조회 |
+| `/api/settings/timezone` | PATCH | 필수 | 타임존 변경 |
 
 ### 약관 (Terms)
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
-| `/api/terms/terms` | GET | 공개 | 이용약관 조회 |
-| `/api/terms/privacy` | GET | 공개 | 개인정보 처리방침 조회 |
+| `/api/terms/{type}` | GET | 공개 | 약관 조회 (type: terms, privacy) |
 
 ### 서버 상태 (Health)
 
 | 엔드포인트 | 메서드 | 인증 | 설명 |
 |-----------|:------:|:----:|------|
 | `/api/health` | GET | 공개 | 서버 상태 확인 |
+| `/api/health/db` | GET | 공개 | DB 연결 상태 확인 |
 
 ---
 
