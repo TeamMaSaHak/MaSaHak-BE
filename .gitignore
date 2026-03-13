@@ -16,6 +16,9 @@ build/
 # MCP 설정 (Supabase 토큰 포함)
 .mcp.json
 
+# 서버 셋업 체크리스트 (내부 IP, SSH 계정 포함)
+SERVER_SETUP_CHECKLIST.md
+
 # Claude Code (개인 사용)
 .claude/
 CLAUDE.md
