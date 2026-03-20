@@ -1,6 +1,6 @@
 # 마법사관학교 API 명세서
 
-> 최종 수정일: 2026-01-14
+> 최종 수정일: 2026-03-21
 
 ---
 
@@ -9,7 +9,14 @@
 | 환경 | Base URL | Swagger |
 |------|----------|---------|
 | 개발 | `http://localhost:3000` | `http://localhost:3000/api-docs` |
-| 운영 | `https://api.masahak.com` | `https://api.masahak.com/api-docs` |
+| 운영 | `https://backend-production-83ee.up.railway.app` | `https://backend-production-83ee.up.railway.app/api-docs` |
+
+### Discord OAuth
+
+| 항목 | 값 |
+|------|-----|
+| Client ID | `1419219230812799076` |
+| Redirect URI (운영) | `https://backend-production-83ee.up.railway.app/api/auth/discord/callback` |
 
 ---
 
@@ -374,9 +381,9 @@ POST /api/pomodoro/start
 ```json
 {
   "startedAt": "2025-12-09T10:00:00.000Z",  // 선택
-  "focusTime": 25,    // 선택, 집중 시간(분), 5-120
-  "breakTime": 5,     // 선택, 쉬는 시간(분), 1-30
-  "repeatCount": 4    // 선택, 반복 횟수, 1-10
+  "focusTime": 25,    // 선택, 집중 시간(분), 5-120, 기본값 25
+  "breakTime": 5,     // 선택, 쉬는 시간(분), 5-30, 기본값 5
+  "repeatCount": 4    // 선택, 반복 횟수, 1-10, 기본값 4
 }
 ```
 
@@ -634,6 +641,7 @@ GET /api/calendar/2025/8
 |--------|------|:------:|-----|------|
 | 투두 | 투두 목록 | GET | `/api/todos` | 특정 날짜 투두 목록 |
 | 투두 | 투두 생성 | POST | `/api/todos` | 투두 생성 |
+| 투두 | 투두 순서 변경 | PATCH | `/api/todos/reorder` | 투두 정렬 순서 변경 |
 | 투두 | 투두 수정 | PATCH | `/api/todos/{todoId}` | 투두 내용 수정 |
 | 투두 | 투두 삭제 | DELETE | `/api/todos/{todoId}` | 투두 삭제 |
 | 투두 | 완료 토글 | PATCH | `/api/todos/{todoId}/toggle` | 완료/미완료 토글 |
@@ -719,7 +727,46 @@ POST /api/todos
 
 ---
 
-## 5.3 투두 수정
+## 5.3 투두 순서 변경
+
+```
+PATCH /api/todos/reorder
+```
+
+**인증 필수**: Bearer Token
+
+### Request Body
+
+```json
+{
+  "items": [
+    { "id": 3, "order": 1 },
+    { "id": 1, "order": 2 },
+    { "id": 5, "order": 3 }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|:----:|------|
+| items | array | O | 투두 ID와 변경할 순서 목록 |
+| items[].id | number | O | 투두 ID |
+| items[].order | number | O | 변경할 정렬 순서 |
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "updatedCount": 3
+  }
+}
+```
+
+---
+
+## 5.4 투두 수정
 
 ```
 PATCH /api/todos/{todoId}
@@ -751,7 +798,7 @@ PATCH /api/todos/{todoId}
 
 ---
 
-## 5.4 투두 삭제
+## 5.5 투두 삭제
 
 ```
 DELETE /api/todos/{todoId}
@@ -773,7 +820,7 @@ DELETE /api/todos/{todoId}
 
 ---
 
-## 5.5 완료 토글
+## 5.6 완료 토글
 
 ```
 PATCH /api/todos/{todoId}/toggle
@@ -846,6 +893,8 @@ POST /api/todos/recurring
 ```
 
 **인증 필수**: Bearer Token
+
+> 생성 시 오늘 날짜의 투두 목록에 즉시 반영됩니다. 다음날부터는 매일 00:00 배치로 자동 생성됩니다.
 
 ### Request Body
 
