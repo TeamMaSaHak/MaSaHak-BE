@@ -12,6 +12,7 @@ import {
   UpdateRecurringTodoResponseDto,
   DeleteRecurringTodoResponseDto,
 } from './dto';
+import { getTodayInTimezone, DEFAULT_TIMEZONE } from '../../common/utils';
 
 @Injectable()
 export class RecurringTodosService {
@@ -78,11 +79,81 @@ export class RecurringTodosService {
       );
     }
 
+    // 오늘 날짜에 즉시 투두 생성
+    await this.insertTodayTodo(userId, guildId, content, data.recurring_id);
+
     return {
       id: data.recurring_id,
       content: data.content,
       createdAt: new Date(data.created_at).toISOString(),
     };
+  }
+
+  /**
+   * 반복 투두 생성 시 오늘 날짜의 todos에도 즉시 INSERT
+   */
+  private async insertTodayTodo(
+    userId: string,
+    guildId: string,
+    content: string,
+    recurringId: number,
+  ): Promise<void> {
+    const supabase = this.supabaseService.getClient();
+
+    // 사용자 타임존 조회
+    const { data: user } = await supabase
+      .from('users')
+      .select('timezone')
+      .eq('user_id', userId)
+      .single();
+
+    const timezone = user?.timezone || DEFAULT_TIMEZONE;
+    const today = getTodayInTimezone(timezone);
+
+    // 중복 체크
+    const { data: existing } = await supabase
+      .from('todos')
+      .select('todo_id')
+      .eq('user_id', userId)
+      .eq('guild_id', guildId)
+      .eq('todo_date', today)
+      .eq('recurring_id', recurringId)
+      .maybeSingle();
+
+    if (existing) {
+      return;
+    }
+
+    // sort_order 계산
+    const { data: lastTodo } = await supabase
+      .from('todos')
+      .select('sort_order')
+      .eq('user_id', userId)
+      .eq('guild_id', guildId)
+      .eq('todo_date', today)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextSortOrder = lastTodo ? lastTodo.sort_order + 1 : 1;
+
+    const { error: insertError } = await supabase
+      .from('todos')
+      .insert({
+        user_id: userId,
+        guild_id: guildId,
+        todo_date: today,
+        content,
+        is_completed: false,
+        sort_order: nextSortOrder,
+        recurring_id: recurringId,
+      });
+
+    if (insertError) {
+      this.logger.error(
+        `Failed to insert today's todo for recurring ${recurringId}: ${insertError.message}`,
+      );
+    }
   }
 
   async updateRecurringTodo(
