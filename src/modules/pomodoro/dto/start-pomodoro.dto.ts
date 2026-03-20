@@ -25,12 +25,12 @@ export class StartPomodoroRequestDto {
   @ApiPropertyOptional({
     description: '쉬는 시간 (분), 생략 시 사용자 설정값 또는 기본값 5분',
     example: 5,
-    minimum: 1,
+    minimum: 5,
     maximum: 30,
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(5)
   @Max(30)
   breakTime?: number;
 

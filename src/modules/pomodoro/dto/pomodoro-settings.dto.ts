@@ -5,23 +5,23 @@ export class PomodoroSettingsDto {
   @ApiProperty({
     description: '집중 시간 (분)',
     example: 25,
-    minimum: 1,
+    minimum: 5,
     maximum: 120,
   })
   @IsInt()
-  @Min(1)
+  @Min(5)
   @Max(120)
   focusTime: number;
 
   @ApiProperty({
     description: '쉬는 시간 (분)',
     example: 5,
-    minimum: 1,
-    maximum: 60,
+    minimum: 5,
+    maximum: 30,
   })
   @IsInt()
-  @Min(1)
-  @Max(60)
+  @Min(5)
+  @Max(30)
   breakTime: number;
 
   @ApiProperty({
