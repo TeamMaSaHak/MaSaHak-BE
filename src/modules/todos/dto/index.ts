@@ -7,3 +7,4 @@ export * from './get-recurring-todos.dto';
 export * from './create-recurring-todo.dto';
 export * from './update-recurring-todo.dto';
 export * from './delete-recurring-todo.dto';
+export * from './reorder-todos.dto';

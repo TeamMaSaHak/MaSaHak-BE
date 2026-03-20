@@ -30,6 +30,8 @@ import {
   UpdateTodoResponseDto,
   DeleteTodoResponseDto,
   ToggleTodoResponseDto,
+  ReorderTodosRequestDto,
+  ReorderTodosResponseDto,
 } from './dto';
 import type { JwtPayload } from '../auth/interfaces';
 
@@ -104,6 +106,39 @@ export class TodosController {
       user.guildId,
       body.content,
       body.date,
+    );
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  @Patch('reorder')
+  @ApiOperation({
+    summary: '투두 순서 변경',
+    description: '투두 항목들의 정렬 순서를 변경합니다.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '투두 순서 변경 성공',
+    type: ApiResponseDto<ReorderTodosResponseDto>,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '인증 실패',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '잘못된 요청 데이터',
+  })
+  async reorderTodos(
+    @CurrentUser() user: JwtPayload,
+    @Body() body: ReorderTodosRequestDto,
+  ): Promise<ApiResponseDto<ReorderTodosResponseDto>> {
+    const result = await this.todosService.reorderTodos(
+      user.sub,
+      user.guildId,
+      body.items,
     );
     return {
       success: true,

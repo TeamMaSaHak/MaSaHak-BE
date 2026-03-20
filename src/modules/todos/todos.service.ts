@@ -12,6 +12,8 @@ import {
   UpdateTodoResponseDto,
   DeleteTodoResponseDto,
   ToggleTodoResponseDto,
+  ReorderTodoItemDto,
+  ReorderTodosResponseDto,
 } from './dto';
 
 @Injectable()
@@ -222,4 +224,33 @@ export class TodosService {
     };
   }
 
+  async reorderTodos(
+    userId: string,
+    guildId: string,
+    items: ReorderTodoItemDto[],
+  ): Promise<ReorderTodosResponseDto> {
+    const supabase = this.supabaseService.getClient();
+
+    const updatePromises = items.map((item) =>
+      supabase
+        .from('todos')
+        .update({ sort_order: item.order })
+        .eq('todo_id', item.id)
+        .eq('user_id', userId)
+        .eq('guild_id', guildId),
+    );
+
+    const results = await Promise.all(updatePromises);
+
+    const failedCount = results.filter((r) => r.error).length;
+    if (failedCount > 0) {
+      this.logger.error(
+        `Failed to reorder ${failedCount}/${items.length} todos`,
+      );
+    }
+
+    return {
+      updatedCount: items.length - failedCount,
+    };
+  }
 }
