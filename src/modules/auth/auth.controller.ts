@@ -6,7 +6,9 @@ import {
   Query,
   Res,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiTags,
   ApiOperation,
@@ -19,7 +21,6 @@ import { AuthService } from './auth.service';
 import { Public, CurrentUser } from '../../common/decorators';
 import { ApiResponseDto } from '../../common/dto';
 import {
-  LoginResponseDto,
   RefreshTokenRequestDto,
   AuthTokensDto,
   VerifyMemberResponseDto,
@@ -29,7 +30,12 @@ import type { JwtPayload } from './interfaces';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  private readonly logger = new Logger(AuthController.name);
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Public()
   @Get('discord')
@@ -51,7 +57,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Discord OAuth 콜백',
     description:
-      'Discord OAuth 콜백을 처리하고 JWT 토큰을 발급합니다. 프론트엔드에서 code를 전달받아 처리합니다.',
+      'Discord OAuth 콜백을 처리하고 JWT 토큰을 발급한 뒤, 모바일 앱 딥링크(masahak://login)로 302 리다이렉트합니다.',
   })
   @ApiQuery({ name: 'code', description: 'Discord OAuth 인증 코드' })
   @ApiQuery({
@@ -61,23 +67,52 @@ export class AuthController {
     example: 'Asia/Seoul',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
-    description: '로그인 성공',
-    type: ApiResponseDto<LoginResponseDto>,
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Discord 인증 실패',
+    status: HttpStatus.FOUND,
+    description: '앱 딥링크로 리다이렉트 (토큰을 쿼리스트링으로 전달)',
   })
   async discordCallback(
+    @Res() res: Response,
     @Query('code') code: string,
     @Query('timezone') timezone?: string,
-  ): Promise<ApiResponseDto<LoginResponseDto>> {
-    const result = await this.authService.handleDiscordCallback(code, timezone);
-    return {
-      success: true,
-      data: result,
-    };
+  ): Promise<void> {
+    const deepLinkBase = this.configService.getOrThrow<string>(
+      'APP_DEEP_LINK_URL',
+    );
+
+    if (!code) {
+      return res.redirect(
+        HttpStatus.FOUND,
+        `${deepLinkBase}?error=missing_code`,
+      );
+    }
+
+    try {
+      const result = await this.authService.handleDiscordCallback(
+        code,
+        timezone,
+      );
+
+      const params = new URLSearchParams({
+        accessToken: result.tokens.accessToken,
+        refreshToken: result.tokens.refreshToken,
+        expiresIn: String(result.tokens.expiresIn),
+        isMember: String(result.isMember),
+        userId: result.user.userId,
+      });
+
+      return res.redirect(
+        HttpStatus.FOUND,
+        `${deepLinkBase}?${params.toString()}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Discord callback failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return res.redirect(
+        HttpStatus.FOUND,
+        `${deepLinkBase}?error=auth_failed`,
+      );
+    }
   }
 
   @Get('verify-member')
