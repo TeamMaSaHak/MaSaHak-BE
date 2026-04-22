@@ -15,7 +15,11 @@ import {
   VerifyMemberResponseDto,
 } from './dto';
 import { ERROR_CODES } from '../../common/constants';
-import { isValidTimezone, DEFAULT_TIMEZONE } from '../../common/utils';
+import {
+  isValidTimezone,
+  DEFAULT_TIMEZONE,
+  parseDisplayName,
+} from '../../common/utils';
 
 @Injectable()
 export class AuthService {
@@ -303,10 +307,12 @@ export class AuthService {
   }
 
   private mapUserToProfile(user: Record<string, unknown>): UserProfileDto {
+    const nickname = String(user.nickname || '');
     return {
       userId: String(user.user_id),
       guildId: String(user.guild_id),
-      nickname: String(user.nickname || ''),
+      nickname,
+      displayName: parseDisplayName(nickname),
       studentNo: user.student_no as string | undefined,
       profileImage: user.profile_image as string | undefined,
       dormitory: user.dormitory as string | undefined,

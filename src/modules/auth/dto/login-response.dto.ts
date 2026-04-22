@@ -15,8 +15,17 @@ export class UserProfileDto {
   })
   guildId: string;
 
-  @ApiProperty({ description: '닉네임', example: '마법사' })
+  @ApiProperty({
+    description: '닉네임 원본 (Discord 서버 닉네임 그대로)',
+    example: '[직장인] 아인',
+  })
   nickname: string;
+
+  @ApiProperty({
+    description: '표시용 이름 (대괄호 카테고리 제거됨). UI 노출용으로 사용 권장',
+    example: '아인',
+  })
+  displayName: string;
 
   @ApiPropertyOptional({ description: '학번', example: '2025010101' })
   studentNo?: string;

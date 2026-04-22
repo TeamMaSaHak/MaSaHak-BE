@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { SupabaseService } from '../../database/supabase';
+import { parseDisplayName } from '../../common/utils';
 import { ProfileResponseDto } from './dto';
 
 @Injectable()
@@ -56,10 +57,12 @@ export class MembersService {
     }
 
     const grade = this.calculateGrade(user.joined_at as string);
+    const nickname = (user.nickname as string) || '마법사';
 
     return {
       profileImage: user.profile_image as string | null,
-      nickname: (user.nickname as string) || '마법사',
+      nickname,
+      displayName: parseDisplayName(nickname),
       studentNo: (user.student_no as string) || '00000000',
       grade,
       gradeName: `${grade}학년`,
