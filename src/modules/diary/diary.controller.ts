@@ -5,6 +5,7 @@ import {
   Put,
   Param,
   Body,
+  Headers,
   HttpStatus,
   HttpCode,
   ForbiddenException,
@@ -16,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { DiaryService } from './diary.service';
 import { LlmService } from '../llm/llm.service';
@@ -124,8 +126,14 @@ export class DiaryController {
   @Post('test-llm')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: '[DEV] LLM 답장 테스트',
-    description: '개발용: LLM 답장 생성을 테스트합니다. 프로덕션 환경에서는 사용 불가.',
+    summary: '[ADMIN] LLM 답장 테스트',
+    description:
+      '관리자용: LLM 답장 생성 플로우를 즉시 테스트합니다. x-admin-key 헤더로 보호됩니다. ADMIN_API_KEY 환경변수 미설정 시 모든 요청 차단.',
+  })
+  @ApiHeader({
+    name: 'x-admin-key',
+    description: '관리자 API 키 (ADMIN_API_KEY 환경변수 값과 일치해야 함)',
+    required: true,
   })
   @ApiBody({
     schema: {
@@ -149,13 +157,15 @@ export class DiaryController {
   })
   @ApiResponse({
     status: HttpStatus.FORBIDDEN,
-    description: '프로덕션 환경에서는 사용 불가',
+    description: '잘못된 관리자 키 또는 관리자 키 미설정',
   })
   async testLlm(
+    @Headers('x-admin-key') adminKey: string | undefined,
     @Body() body: { content: string; conceptIndex?: number },
   ): Promise<ApiResponseDto<{ reply: string | null }>> {
-    if (process.env.NODE_ENV === 'production') {
-      throw new ForbiddenException('This endpoint is not available in production');
+    const expectedKey = process.env.ADMIN_API_KEY;
+    if (!expectedKey || adminKey !== expectedKey) {
+      throw new ForbiddenException('Invalid admin key');
     }
 
     const reply = await this.llmService.generateDiaryReply(
