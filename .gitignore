@@ -29,6 +29,24 @@ firebase-service-account.json
 *-firebase-adminsdk-*.json
 serviceAccountKey.json
 
+# Apple APNs Auth Key (.p8) - 절대 커밋 금지
+*.p8
+AuthKey_*.p8
+
+# Apple 기타 인증서/프로비저닝 파일
+*.p12
+*.pem
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# Firebase 클라이언트 설정 (iOS/Android - FE 영역, BE에 둘 필요 없음)
+GoogleService-Info.plist
+google-services.json
+
+# Windows Git Bash 덤프
+*.stackdump
+
 # IDE
 .idea/
 .vscode/
